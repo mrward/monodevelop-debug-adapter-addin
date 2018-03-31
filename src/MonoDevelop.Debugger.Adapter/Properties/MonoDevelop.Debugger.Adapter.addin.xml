@@ -1,0 +1,5 @@
+﻿<ExtensionModel>
+	<Runtime>
+		<Import assembly="MonoDevelop.Debugger.Adapter.dll" />
+	</Runtime>
+</ExtensionModel>
