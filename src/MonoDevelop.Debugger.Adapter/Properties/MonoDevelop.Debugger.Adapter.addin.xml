@@ -2,4 +2,21 @@
 	<Runtime>
 		<Import assembly="MonoDevelop.Debugger.Adapter.dll" />
 	</Runtime>
+
+	<Extension path="/MonoDevelop/Ide/Commands">
+		<Category _name="Debug" id="Debug">
+			<Command
+				id="MonoDevelop.Debugger.Adapter.Commands.Launch"
+				_description="Launches a debug adapter"
+				_label="Launch Debug Adapter..."
+				defaultHandler="MonoDevelop.Debugger.Adapter.LaunchDebugAdapterHandler" />
+		</Category>
+	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/MainMenu/Run">
+		<CommandItem
+			id="MonoDevelop.Debugger.Adapter.Commands.Launch"
+			insertafter="MonoDevelop.Debugger.DebugCommands.Detach"
+			insertbefore="MonoDevelop.Debugger.SteppingSection" />
+	</Extension>
 </ExtensionModel>
