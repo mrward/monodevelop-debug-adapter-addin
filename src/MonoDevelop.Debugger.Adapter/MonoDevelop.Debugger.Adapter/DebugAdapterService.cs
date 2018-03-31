@@ -24,15 +24,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Diagnostics;
 using MonoDevelop.Core;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
+using System;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 
 namespace MonoDevelop.Debugger.Adapter
 {
 	static class DebugAdapterService
 	{
+		static MonoDevelopDebugAdapterHost host;
+
 		public static void LaunchAdapter (FilePath launchJsonFile)
 		{
 			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
+
+			Process process = StartDebugAdapterProcess (launchJson);
+			if (process != null) {
+				host = new MonoDevelopDebugAdapterHost (process);
+				host.Start ();
+
+				var initialize = new InitializeRequest ();
+				initialize.Args.AdapterID = "Test";
+				host.Protocol.SendRequest (initialize, OnCompleted, OnError);
+			}
+		}
+
+		static void OnError (InitializeArguments args, ProtocolException ex)
+		{
+			host.Protocol.Stop ();
+		}
+
+		static void OnCompleted (InitializeArguments args, InitializeResponse response)
+		{
+			host.Protocol.Stop ();
+		}
+
+		static Process StartDebugAdapterProcess (MinimalLaunchJson launchJson)
+		{
+			var info = new ProcessStartInfo {
+				FileName = "mono",
+				Arguments = "\"" + launchJson.Adapter + "\"",
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			};
+
+			var process = new Process ();
+			process.StartInfo = info;
+
+			if (process.Start()) {
+				return process;
+			}
+			return null;
 		}
 	}
 }
