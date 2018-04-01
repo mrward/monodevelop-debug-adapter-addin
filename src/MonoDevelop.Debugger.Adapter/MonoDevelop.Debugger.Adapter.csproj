@@ -42,6 +42,10 @@
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerSession.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerStartInfo.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\ProjectOperationsExtensions.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\SelectActiveConfigurationCommandHandler.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurations.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationCacheInfo.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationsReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />

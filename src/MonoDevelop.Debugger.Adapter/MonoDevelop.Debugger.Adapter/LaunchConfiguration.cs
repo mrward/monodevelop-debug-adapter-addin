@@ -42,8 +42,24 @@ namespace MonoDevelop.Debugger.Adapter
 	/// </summary>
 	class LaunchConfiguration
 	{
+		public static string NoneConfigurationId = "None";
+
+		public static LaunchConfiguration CreateNoneConfiguration ()
+		{
+			return new LaunchConfiguration {
+				Id = NoneConfigurationId,
+				Name = GettextCatalog.GetString ("None")
+			};
+		}
+
 		Dictionary<string, JToken> properties = new Dictionary<string, JToken> ();
 		FilePath fileName;
+
+		[JsonIgnore]
+		public string Id { get; private set; }
+
+		[JsonIgnore]
+		public string Name { get; private set; }
 
 		[JsonProperty ("$adapter")]
 		public string Adapter { get; set; }
@@ -58,20 +74,60 @@ namespace MonoDevelop.Debugger.Adapter
 		public string Type { get; set; }
 
 		[JsonIgnore]
+		public bool IsActive { get; set; }
+
+		[JsonIgnore]
 		public Dictionary<string, JToken> Properties {
 			get { return properties; }
 		}
 
+		public bool IsValid ()
+		{
+			return StringComparer.OrdinalIgnoreCase.Equals (Request, "launch") &&
+				!string.IsNullOrEmpty (Adapter);
+		}
+
+		public static IEnumerable<LaunchConfiguration> ReadConfigurations (FilePath fileName, JProperty configurationsProperty)
+		{
+			var configurations = configurationsProperty.Value as JArray;
+			if (configurations != null) {
+				foreach (JToken token in configurations) {
+					var jsonObject = token as JObject;
+					if (jsonObject != null) {
+						yield return Read (fileName, jsonObject);
+					}
+				}
+			}
+		}
+
 		public static LaunchConfiguration Read (FilePath fileName)
+		{
+			string json = File.ReadAllText (fileName);
+			JObject jsonObject = JObject.Parse (json);
+			return Read (fileName, jsonObject);
+		}
+
+		public static LaunchConfiguration Read (FilePath fileName, JObject jsonObject)
 		{
 			var config = new LaunchConfiguration ();
 			config.fileName = fileName;
 
-			string json = File.ReadAllText (fileName);
-			JObject jsonObject = JObject.Parse (json);
-
 			foreach (KeyValuePair<string, JToken> item in jsonObject) {
 				config.AddProperty (item.Key, item.Value);
+			}
+
+			if (string.IsNullOrEmpty (config.Name)) {
+				config.Name = config.Type;
+				if (string.IsNullOrEmpty (config.Name)) {
+					config.Name = "launch.json";
+				}
+			}
+
+			// Special case 'node'.
+			if (string.IsNullOrEmpty (config.Adapter)) {
+				if (config.Type == "node") {
+					config.Adapter = "node";
+				}
 			}
 
 			return config;
@@ -91,6 +147,8 @@ namespace MonoDevelop.Debugger.Adapter
 				Request = value.ToString ();
 			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "type")) {
 				Type = value.ToString ();
+			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "name")) {
+				Name = value.ToString ();
 			}
 		}
 

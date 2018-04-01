@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// SelectActiveConfigurationCommandHandler.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,42 +24,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Collections.Generic;
-using MonoDevelop.Core;
+using System.Linq;
+using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	class SelectActiveConfigurationCommandHandler: CommandHandler
 	{
-		static LaunchConfigurations launchConfigurations = new LaunchConfigurations ();
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		protected override void Update (CommandArrayInfo info)
 		{
-			var launchConfig = LaunchConfiguration.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchConfig);
+			Document document = IdeApp.Workbench.ActiveDocument;
 
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			var configurations = DebugAdapterService.GetLaunchConfigurations (document);
+			if (!configurations.Any ()) {
+				info.Bypass = true;
+				return;
+			}
+
+			foreach (LaunchConfiguration config in configurations) {
+				CommandInfo item = info.Add (config.Name, config);
+				item.Checked = config.IsActive;
+			}
 		}
 
-		public static IEnumerable<LaunchConfiguration> GetLaunchConfigurations (Document document)
+		protected override void Run (object dataItem)
 		{
-			return launchConfigurations.GetConfigurations (document);
-		}
-
-		public static void SetActiveLaunchConfiguration (LaunchConfiguration config, Document document)
-		{
-			launchConfigurations.SetActiveLaunchConfiguration (config, document);
-		}
-
-		public static LaunchConfiguration GetActiveLaunchConfiguration (string scriptFileName)
-		{
-			var activeConfig = launchConfigurations.GetActiveLaunchConfiguration (scriptFileName);
-			if (activeConfig != null && activeConfig.Id != LaunchConfiguration.NoneConfigurationId)
-				return activeConfig;
-
-			return null;
+			Document document = IdeApp.Workbench.ActiveDocument;
+			var config = dataItem as LaunchConfiguration;
+			DebugAdapterService.SetActiveLaunchConfiguration (config, document);
 		}
 	}
 }

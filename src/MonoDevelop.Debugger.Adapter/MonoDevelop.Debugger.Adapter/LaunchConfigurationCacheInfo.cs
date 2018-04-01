@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// LaunchConfigurationCacheInfo.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,40 +24,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using MonoDevelop.Core;
-using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	class LaunchConfigurationCacheInfo
 	{
-		static LaunchConfigurations launchConfigurations = new LaunchConfigurations ();
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public LaunchConfigurationCacheInfo (
+			List<LaunchConfiguration> configurations,
+			FilePath launchJsonFileName,
+			DateTime lastWriteTime)
 		{
-			var launchConfig = LaunchConfiguration.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchConfig);
-
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			Configurations = configurations;
+			LaunchJsonFileName = launchJsonFileName;
+			LaunchJsonLastWriteTime = lastWriteTime;
 		}
 
-		public static IEnumerable<LaunchConfiguration> GetLaunchConfigurations (Document document)
+		public List<LaunchConfiguration> Configurations { get; private set; }
+		public FilePath LaunchJsonFileName { get; private set; }
+		public DateTime LaunchJsonLastWriteTime { get; private set; }
+
+		public bool IsOutOfDate ()
 		{
-			return launchConfigurations.GetConfigurations (document);
+			if (!File.Exists (LaunchJsonFileName)) {
+				return true;
+			}
+
+			DateTime lastWriteTime = File.GetLastWriteTime (LaunchJsonFileName);
+			return lastWriteTime > LaunchJsonLastWriteTime;
 		}
 
-		public static void SetActiveLaunchConfiguration (LaunchConfiguration config, Document document)
+		public string GetActiveConfigurationName ()
 		{
-			launchConfigurations.SetActiveLaunchConfiguration (config, document);
-		}
-
-		public static LaunchConfiguration GetActiveLaunchConfiguration (string scriptFileName)
-		{
-			var activeConfig = launchConfigurations.GetActiveLaunchConfiguration (scriptFileName);
-			if (activeConfig != null && activeConfig.Id != LaunchConfiguration.NoneConfigurationId)
-				return activeConfig;
+			var activeConfiguration = Configurations.FirstOrDefault (c => c.IsActive);
+			if (activeConfiguration != null) {
+				return activeConfiguration.Name;
+			}
 
 			return null;
 		}
