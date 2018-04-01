@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// DebugAdapterDebuggerStartInfo.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,21 +24,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
+using Mono.Debugging.Client;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	class DebugAdapterDebuggerStartInfo : DebuggerStartInfo
 	{
-		static MonoDevelopDebugAdapterHost host;
+		DebugAdapterExecutionCommand command;
 
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public DebugAdapterDebuggerStartInfo (DebugAdapterExecutionCommand command)
 		{
-			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchJson);
+			this.command = command;
 
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			Command = command.Command;
+			Arguments = command.Arguments;
+			WorkingDirectory = command.WorkingDirectory;
+
+			LaunchJson = command.LaunchJson;
+		}
+
+		public MinimalLaunchJson LaunchJson { get; set; }
+
+		public override string ToString ()
+		{
+			return $"Command={Command}, Arguments={Arguments}";
 		}
 	}
 }

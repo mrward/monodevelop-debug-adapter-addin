@@ -19,4 +19,13 @@
 			insertafter="MonoDevelop.Debugger.DebugCommands.Detach"
 			insertbefore="MonoDevelop.Debugger.SteppingSection" />
 	</Extension>
+
+	<Extension path="/MonoDevelop/Debugging/DebuggerEngines">
+		<DebuggerEngine
+			id="MonoDevelop.Debugger.Adapter"
+			name="Debug Adapter"
+			insertbefore="Mono.Debugger.Gdb"
+			features="Breakpoints, Pause, Stepping, DebugFile"
+			type="MonoDevelop.Debugger.Adapter.DebugAdapterDebuggerEngine" />
+	</Extension>
 </ExtensionModel>

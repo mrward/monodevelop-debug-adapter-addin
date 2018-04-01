@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// ProcessExtensions.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,21 +24,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
+using System.Diagnostics;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	static class ProcessExtensions
 	{
-		static MonoDevelopDebugAdapterHost host;
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public static bool Start (this Process process, MinimalLaunchJson launchJson)
 		{
-			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchJson);
+			var info = new ProcessStartInfo {
+				FileName = "mono",
+				Arguments = "\"" + launchJson.Adapter + "\"",
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			};
 
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			process.StartInfo = info;
+
+			return process.Start ();
 		}
 	}
 }

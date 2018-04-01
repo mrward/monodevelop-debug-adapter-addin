@@ -37,6 +37,12 @@
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterService.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\MinimalLaunchJson.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\MonoDevelopDebugAdapterHost.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerEngine.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterExecutionCommand.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerSession.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerStartInfo.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\ProcessExtensions.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\ProjectOperationsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />

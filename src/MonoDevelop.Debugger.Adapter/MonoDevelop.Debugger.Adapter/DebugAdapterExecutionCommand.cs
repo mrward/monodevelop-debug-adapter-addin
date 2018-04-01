@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// DebugAdapterExecutionCommand.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,21 +24,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
+using MonoDevelop.Core.Execution;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	class DebugAdapterExecutionCommand : NativeExecutionCommand
 	{
-		static MonoDevelopDebugAdapterHost host;
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public DebugAdapterExecutionCommand (MinimalLaunchJson launchJson)
 		{
-			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchJson);
+			LaunchJson = launchJson;
 
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			Command = launchJson.Adapter;
 		}
+
+		public MinimalLaunchJson LaunchJson { get; set; }
 	}
 }

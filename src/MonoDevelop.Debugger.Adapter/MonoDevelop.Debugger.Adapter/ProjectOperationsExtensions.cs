@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// ProjectOperationsExtensions.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,21 +24,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.IO;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	static class ProjectOperationsExtensions
 	{
-		static MonoDevelopDebugAdapterHost host;
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public static AsyncOperation DebugApplication (this ProjectOperations operations, DebugAdapterExecutionCommand command)
 		{
-			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchJson);
+			string title = Path.GetFileName (command.Command);
+			var monitor = IdeApp.Workbench.ProgressMonitors.GetRunProgressMonitor (title);
 
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			var debugOperation = DebuggingService.Run (command, monitor.Console);
+			operations.AddRunOperation (debugOperation);
+
+			debugOperation.Task.ContinueWith (t => {
+				monitor.Dispose ();
+			});
+
+			return debugOperation;
 		}
 	}
 }
