@@ -1,5 +1,5 @@
 ﻿//
-// MinimalLaunchJson.cs
+// LaunchConfiguration.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using MonoDevelop.Core;
@@ -39,40 +40,58 @@ namespace MonoDevelop.Debugger.Adapter
 	///     "program": "c:\\path\\to\\your\\folder\\MockDebug.txt"
 	/// }
 	/// </summary>
-	class MinimalLaunchJson
+	class LaunchConfiguration
 	{
-		Dictionary<string, JToken> configurationProperties;
-
-		[JsonProperty ("type")]
-		public string Type { get; set; }
-
-		[JsonProperty ("request")]
-		public string Request { get; set; }
-
-		[JsonProperty ("program")]
-		public string Program { get; set; }
+		Dictionary<string, JToken> properties = new Dictionary<string, JToken> ();
+		FilePath fileName;
 
 		[JsonProperty ("$adapter")]
 		public string Adapter { get; set; }
 
+		[JsonProperty ("program")]
+		public string Program { get; set; }
+
+		[JsonProperty ("request")]
+		public string Request { get; set; }
+
+		[JsonProperty ("type")]
+		public string Type { get; set; }
+
 		[JsonIgnore]
-		public Dictionary<string, JToken> ConfigurationProperties {
-			get { return configurationProperties; }
+		public Dictionary<string, JToken> Properties {
+			get { return properties; }
 		}
 
-		public static MinimalLaunchJson Read (FilePath fileName)
+		public static LaunchConfiguration Read (FilePath fileName)
 		{
+			var config = new LaunchConfiguration ();
+			config.fileName = fileName;
+
 			string json = File.ReadAllText (fileName);
+			JObject jsonObject = JObject.Parse (json);
 
-			var launchJson = JsonConvert.DeserializeObject<MinimalLaunchJson> (json);
+			foreach (KeyValuePair<string, JToken> item in jsonObject) {
+				config.AddProperty (item.Key, item.Value);
+			}
 
-			launchJson.Program = FixRelativePath (fileName.ParentDirectory, launchJson.Program);
-			launchJson.Adapter = FixRelativePath (fileName.ParentDirectory, launchJson.Adapter);
+			return config;
+		}
 
-			launchJson.configurationProperties = new Dictionary<string, JToken> ();
-			launchJson.configurationProperties.Add ("program", new JValue (launchJson.Program));
+		void AddProperty (string name, JToken value)
+		{
+			properties [name] = value;
 
-			return launchJson;
+			if (StringComparer.OrdinalIgnoreCase.Equals (name, "program")) {
+				Program = FixRelativePath (fileName.ParentDirectory, value.ToString ());
+				properties [name] = new JValue (Program);
+			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "$adapter")) {
+				Adapter = FixRelativePath (fileName.ParentDirectory, value.ToString ());
+				properties [name] = new JValue (Adapter);
+			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "request")) {
+				Request = value.ToString ();
+			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "type")) {
+				Type = value.ToString ();
+			}
 		}
 
 		static string FixRelativePath (FilePath baseDirectory, string fileName)

@@ -33,8 +33,8 @@ namespace MonoDevelop.Debugger.Adapter
 	{
 		public static void LaunchAdapter (FilePath launchJsonFile)
 		{
-			var launchJson = MinimalLaunchJson.Read (launchJsonFile);
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchJson);
+			var launchConfig = LaunchConfiguration.Read (launchJsonFile);
+			var debugAdapterCommand = new DebugAdapterExecutionCommand (launchConfig);
 
 			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
 		}

@@ -43,13 +43,13 @@ namespace MonoDevelop.Debugger.Adapter
 			Arguments = command.Arguments;
 			WorkingDirectory = command.WorkingDirectory;
 
-			Adapter = command.LaunchJson.Adapter;
-			LaunchJson = command.LaunchJson;
+			Adapter = command.LaunchConfiguration.Adapter;
+			LaunchConfiguration = command.LaunchConfiguration;
 		}
 
 		public string Adapter { get; set; }
 
-		public MinimalLaunchJson LaunchJson { get; private set; }
+		public LaunchConfiguration LaunchConfiguration { get; private set; }
 		public DebugAdapterExecutionCommand ExecutionCommand { get; private set; }
 
 		public override string ToString ()

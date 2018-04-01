@@ -30,13 +30,13 @@ namespace MonoDevelop.Debugger.Adapter
 {
 	class DebugAdapterExecutionCommand : NativeExecutionCommand
 	{
-		public DebugAdapterExecutionCommand (MinimalLaunchJson launchJson)
+		public DebugAdapterExecutionCommand (LaunchConfiguration launchConfig)
 		{
-			LaunchJson = launchJson;
+			LaunchConfiguration = launchConfig;
 
-			Command = launchJson.Adapter;
+			Command = launchConfig.Adapter;
 		}
 
-		public MinimalLaunchJson LaunchJson { get; set; }
+		public LaunchConfiguration LaunchConfiguration { get; set; }
 	}
 }
