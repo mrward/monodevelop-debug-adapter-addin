@@ -24,7 +24,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Diagnostics;
 using Mono.Debugging.Client;
+using MonoDevelop.Core;
+using MonoDevelop.Core.Assemblies;
 
 namespace MonoDevelop.Debugger.Adapter
 {
@@ -40,14 +43,61 @@ namespace MonoDevelop.Debugger.Adapter
 			Arguments = command.Arguments;
 			WorkingDirectory = command.WorkingDirectory;
 
+			Adapter = command.LaunchJson.Adapter;
 			LaunchJson = command.LaunchJson;
 		}
 
-		public MinimalLaunchJson LaunchJson { get; set; }
+		public string Adapter { get; set; }
+
+		public MinimalLaunchJson LaunchJson { get; private set; }
+		public DebugAdapterExecutionCommand ExecutionCommand { get; private set; }
 
 		public override string ToString ()
 		{
 			return $"Command={Command}, Arguments={Arguments}";
+		}
+
+		public ProcessStartInfo GetProcessStartInfo ()
+		{
+			string fileName = Adapter;
+			string arguments = null;
+
+			string monoPath = GetMonoPath ();
+			if (monoPath != null) {
+				fileName = monoPath;
+				arguments = "\"" + Adapter + "\"";
+			}
+
+			return new ProcessStartInfo {
+				FileName = fileName,
+				Arguments = arguments,
+				RedirectStandardInput = true,
+				RedirectStandardOutput = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			};
+		}
+
+		string GetMonoPath ()
+		{
+			if (AdapterIsDotNetExe ()) {
+				var monoRuntime = Runtime.SystemAssemblyService.DefaultRuntime as MonoTargetRuntime;
+				if (monoRuntime != null) {
+					return monoRuntime.GetMonoExecutableForAssembly (Adapter);
+				}
+			}
+			return null;
+		}
+
+		bool AdapterIsDotNetExe ()
+		{
+			FilePath fileName = Adapter;
+
+			if (!fileName.IsNullOrEmpty) {
+				return fileName.HasExtension (".exe") || fileName.HasExtension (".dll");
+			}
+
+			return false;
 		}
 	}
 }

@@ -41,7 +41,6 @@
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterExecutionCommand.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerSession.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerStartInfo.cs" />
-    <Compile Include="MonoDevelop.Debugger.Adapter\ProcessExtensions.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\ProjectOperationsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

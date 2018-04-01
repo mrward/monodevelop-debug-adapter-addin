@@ -31,8 +31,6 @@ namespace MonoDevelop.Debugger.Adapter
 {
 	static class DebugAdapterService
 	{
-		static MonoDevelopDebugAdapterHost host;
-
 		public static void LaunchAdapter (FilePath launchJsonFile)
 		{
 			var launchJson = MinimalLaunchJson.Read (launchJsonFile);

@@ -102,7 +102,8 @@ namespace MonoDevelop.Debugger.Adapter
 			try {
 				var debugAdapterStartInfo = (DebugAdapterDebuggerStartInfo)startInfo;
 				var process = new Process ();
-				if (!process.Start (debugAdapterStartInfo.LaunchJson)) {
+				process.StartInfo = debugAdapterStartInfo.GetProcessStartInfo ();
+				if (!process.Start ()) {
 					LoggingService.LogError ("Failed to launch Debug Adapter. {0}", debugAdapterStartInfo);
 					return;
 				}
