@@ -34,13 +34,17 @@ namespace MonoDevelop.Debugger.Adapter
 {
 	class MonoDevelopDebugAdapterHost : DebugAdapterHostBase
 	{
-		public MonoDevelopDebugAdapterHost (Process process)
-			: this (process.StandardInput.BaseStream, process.StandardOutput.BaseStream)
+		DebugAdapterDebuggerSession session;
+
+		public MonoDevelopDebugAdapterHost (DebugAdapterDebuggerSession session, Process process)
+			: this (session, process.StandardInput.BaseStream, process.StandardOutput.BaseStream)
 		{
 		}
 
-		public MonoDevelopDebugAdapterHost (Stream inputStream, Stream outputStream)
+		public MonoDevelopDebugAdapterHost (DebugAdapterDebuggerSession session, Stream inputStream, Stream outputStream)
 		{
+			this.session = session;
+
 			InitializeProtocolHost (inputStream, outputStream);
 		}
 
@@ -53,15 +57,19 @@ namespace MonoDevelop.Debugger.Adapter
 
 		void OnLogMessage (object sender, LogEventArgs e)
 		{
+			session.OnLogMessage (e.Category, e.Message);
 		}
 
 		void OnDispatcherError (object sender, DispatcherErrorEventArgs e)
 		{
+			string message = string.Format ("OnDispatcherError {0}", e.Exception);
+			session.OnLogMessage (LogCategory.Warning, message);
 		}
 
 		protected override void HandleProtocolError (Exception ex)
 		{
-			base.HandleProtocolError (ex);
+			string message = string.Format ("HandleProtocolError {0}", ex);
+			session.OnLogMessage (LogCategory.Warning, message);
 		}
 
 		protected override void HandleInitializedEvent (InitializedEvent body)

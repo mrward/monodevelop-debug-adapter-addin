@@ -177,5 +177,11 @@ namespace MonoDevelop.Debugger.Adapter
 				LoggingService.LogError ("DebugAdapterDebuggerSession.OnExit error.", ex);
 			}
 		}
+
+		public void OnLogMessage (LogCategory category, string message)
+		{
+			bool standardError = category == LogCategory.Warning;
+			OnDebuggerOutput (standardError, message + Environment.NewLine);
+		}
 	}
 }
