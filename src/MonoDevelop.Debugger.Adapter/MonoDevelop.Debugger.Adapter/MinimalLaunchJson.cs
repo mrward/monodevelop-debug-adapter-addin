@@ -24,11 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Newtonsoft.Json;
-using MonoDevelop.Core;
+using System.Collections.Generic;
 using System.IO;
-using System;
-using System.Diagnostics;
+using MonoDevelop.Core;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MonoDevelop.Debugger.Adapter
 {
@@ -41,6 +41,8 @@ namespace MonoDevelop.Debugger.Adapter
 	/// </summary>
 	class MinimalLaunchJson
 	{
+		Dictionary<string, JToken> configurationProperties;
+
 		[JsonProperty ("type")]
 		public string Type { get; set; }
 
@@ -53,13 +55,22 @@ namespace MonoDevelop.Debugger.Adapter
 		[JsonProperty ("$adapter")]
 		public string Adapter { get; set; }
 
+		[JsonIgnore]
+		public Dictionary<string, JToken> ConfigurationProperties {
+			get { return configurationProperties; }
+		}
+
 		public static MinimalLaunchJson Read (FilePath fileName)
 		{
 			string json = File.ReadAllText (fileName);
+
 			var launchJson = JsonConvert.DeserializeObject<MinimalLaunchJson> (json);
 
 			launchJson.Program = FixRelativePath (fileName.ParentDirectory, launchJson.Program);
 			launchJson.Adapter = FixRelativePath (fileName.ParentDirectory, launchJson.Adapter);
+
+			launchJson.configurationProperties = new Dictionary<string, JToken> ();
+			launchJson.configurationProperties.Add ("program", new JValue (launchJson.Program));
 
 			return launchJson;
 		}

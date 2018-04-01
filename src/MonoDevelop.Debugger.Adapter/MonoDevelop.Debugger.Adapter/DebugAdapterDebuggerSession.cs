@@ -26,6 +26,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Client;
 using MonoDevelop.Core;
@@ -35,6 +36,7 @@ namespace MonoDevelop.Debugger.Adapter
 	class DebugAdapterDebuggerSession : DebuggerSession
 	{
 		MonoDevelopDebugAdapterHost debugAdapterHost;
+		InitializeResponse initializeResponse;
 
 		protected override void OnAttachToProcess (long processId)
 		{
@@ -108,12 +110,14 @@ namespace MonoDevelop.Debugger.Adapter
 					return;
 				}
 
-				debugAdapterHost = new MonoDevelopDebugAdapterHost (process);
+				debugAdapterHost = new MonoDevelopDebugAdapterHost (this, process);
 				debugAdapterHost.Start ();
 
 				OnInitialize ();
-
 				OnStarted ();
+
+				OnLaunch (debugAdapterStartInfo);
+				OnConfigurationComplete ();
 			} catch (Exception ex) {
 				LoggingService.LogError ("DebugAdapterDebuggerSession.OnRun error.", ex);
 			}
@@ -123,7 +127,21 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			var initialize = new InitializeRequest ();
 			initialize.Args.AdapterID = "Test";
-			debugAdapterHost.Protocol.SendRequestSync (initialize);
+			initializeResponse = debugAdapterHost.Protocol.SendRequestSync (initialize);
+		}
+
+		void OnConfigurationComplete ()
+		{
+			if (initializeResponse.SupportsConfigurationDoneRequest == true) {
+				var configurationDoneRequest = new ConfigurationDoneRequest ();
+				debugAdapterHost.Protocol.SendRequestSync (configurationDoneRequest);
+			}
+		}
+
+		void OnLaunch (DebugAdapterDebuggerStartInfo startInfo)
+		{
+			var launchRequest = new LaunchRequest (false, startInfo.LaunchJson.ConfigurationProperties);
+			debugAdapterHost.Protocol.SendRequestSync (launchRequest);
 		}
 
 		protected override void OnSetActiveThread (long processId, long threadId)
@@ -178,10 +196,24 @@ namespace MonoDevelop.Debugger.Adapter
 			}
 		}
 
-		public void OnLogMessage (LogCategory category, string message)
+		internal void OnLogMessage (LogCategory category, string message)
 		{
 			bool standardError = category == LogCategory.Warning;
 			OnDebuggerOutput (standardError, message + Environment.NewLine);
+		}
+
+		internal void OnTerminated ()
+		{
+			var eventArgs = new TargetEventArgs (TargetEventType.TargetExited);
+			OnTargetEvent (eventArgs);
+		}
+
+		internal void OnExited (int exitCode)
+		{
+			var eventArgs = new TargetEventArgs (TargetEventType.TargetExited) {
+				ExitCode = exitCode
+			};
+			OnTargetEvent (eventArgs);
 		}
 	}
 }

@@ -25,10 +25,10 @@
 // THE SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
-using System.Diagnostics;
 
 namespace MonoDevelop.Debugger.Adapter
 {
@@ -72,9 +72,14 @@ namespace MonoDevelop.Debugger.Adapter
 			session.OnLogMessage (LogCategory.Warning, message);
 		}
 
-		protected override void HandleInitializedEvent (InitializedEvent body)
+		protected override void HandleTerminatedEvent (TerminatedEvent body)
 		{
-			base.HandleInitializedEvent (body);
+			session.OnTerminated ();
+		}
+
+		protected override void HandleExitedEvent (ExitedEvent body)
+		{
+			session.OnExited (body.ExitCode);
 		}
 	}
 }
