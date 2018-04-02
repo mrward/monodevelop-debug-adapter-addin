@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// DocumentExtensions.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,43 +24,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Collections.Generic;
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	static class DocumentExtensions
 	{
-		static LaunchConfigurations launchConfigurations = new LaunchConfigurations ();
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		public static bool SupportsLaunchConfiguration (this Document document)
 		{
-			var configuration = LaunchConfiguration.Read (launchJsonFile);
-			LaunchAdapter (configuration);
-		}
+			if (document != null) {
+				return document.FileName.IsNotNull;
+			}
 
-		public static void LaunchAdapter (LaunchConfiguration configuration)
-		{
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (configuration);
-
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
-		}
-
-		public static IEnumerable<LaunchConfiguration> GetLaunchConfigurations (Document document)
-		{
-			return launchConfigurations.GetConfigurations (document);
-		}
-
-		public static void SetActiveLaunchConfiguration (LaunchConfiguration config, Document document)
-		{
-			launchConfigurations.SetActiveLaunchConfiguration (config, document);
-		}
-
-		public static LaunchConfiguration GetActiveLaunchConfiguration (Document document)
-		{
-			return launchConfigurations.GetActiveLaunchConfiguration (document);
+			return false;
 		}
 	}
 }

@@ -39,6 +39,10 @@ namespace MonoDevelop.Debugger.Adapter
 
 		public IEnumerable<LaunchConfiguration> GetConfigurations (Document document)
 		{
+			if (!document.SupportsLaunchConfiguration ()) {
+				return Enumerable.Empty<LaunchConfiguration> ();
+			}
+
 			return GetConfigurations (document.FileName);
 		}
 
@@ -73,9 +77,9 @@ namespace MonoDevelop.Debugger.Adapter
 					existingConfig.IsActive = false;
 				}
 				config.IsActive = true;
+			} else {
+				LoggingService.LogWarning ("Launch configuration not found. Unable to set active configuration. '{0}'", document.FileName);
 			}
-
-			LoggingService.LogWarning ("Launch configuration not found. Unable to set active configuration. '{0}'", document.FileName);
 		}
 
 		List<LaunchConfiguration> ReadConfigurations (FilePath scriptFileName, string activeConfiguration = "None")
@@ -122,9 +126,13 @@ namespace MonoDevelop.Debugger.Adapter
 				defaultActiveConfiguration.IsActive = true;
 		}
 
-		public LaunchConfiguration GetActiveLaunchConfiguration (FilePath scriptFileName)
+		public LaunchConfiguration GetActiveLaunchConfiguration (Document document)
 		{
-			return GetConfigurations (scriptFileName)
+			if (!document.SupportsLaunchConfiguration ()) {
+				return null;
+			}
+
+			return GetConfigurations (document.FileName)
 				.FirstOrDefault (configuration => configuration.IsActive);
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterService.cs
+// DebugActiveConfigurationHandler.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,43 +24,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Collections.Generic;
-using MonoDevelop.Core;
+using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	static class DebugAdapterService
+	class DebugActiveConfigurationHandler : CommandHandler
 	{
-		static LaunchConfigurations launchConfigurations = new LaunchConfigurations ();
-
-		public static void LaunchAdapter (FilePath launchJsonFile)
+		protected override void Update (CommandInfo info)
 		{
-			var configuration = LaunchConfiguration.Read (launchJsonFile);
-			LaunchAdapter (configuration);
+			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
+
+			if (configuration == null) {
+				info.Visible = false;
+			} else {
+				info.Enabled = configuration.Id != LaunchConfiguration.NoneConfigurationId;
+				info.Visible = true;
+			}
 		}
 
-		public static void LaunchAdapter (LaunchConfiguration configuration)
+		LaunchConfiguration GetActiveLaunchConfiguration ()
 		{
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (configuration);
-
-			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
+			Document document = IdeApp.Workbench.ActiveDocument;
+			return DebugAdapterService.GetActiveLaunchConfiguration (document);
 		}
 
-		public static IEnumerable<LaunchConfiguration> GetLaunchConfigurations (Document document)
+		protected override void Run (object dataItem)
 		{
-			return launchConfigurations.GetConfigurations (document);
-		}
-
-		public static void SetActiveLaunchConfiguration (LaunchConfiguration config, Document document)
-		{
-			launchConfigurations.SetActiveLaunchConfiguration (config, document);
-		}
-
-		public static LaunchConfiguration GetActiveLaunchConfiguration (Document document)
-		{
-			return launchConfigurations.GetActiveLaunchConfiguration (document);
+			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
+			if (configuration != null) {
+				DebugAdapterService.LaunchAdapter (configuration);
+			}
 		}
 	}
 }

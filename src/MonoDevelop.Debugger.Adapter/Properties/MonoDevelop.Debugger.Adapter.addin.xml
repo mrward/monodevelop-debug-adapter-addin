@@ -8,14 +8,19 @@
 			<Command
 				id="MonoDevelop.Debugger.Adapter.Commands.Launch"
 				_description="Launches a debug adapter"
-				_label="Launch Debug Adapter..."
+				_label="Launch Debug Adapter…"
 				defaultHandler="MonoDevelop.Debugger.Adapter.LaunchDebugAdapterHandler" />
 			<Command
 				id="MonoDevelop.Debugger.Adapter.Commands.SelectActiveConfiguration"
 				type="radio|array"
 				_description="Selects the active launch configuration from the launch.json file."
-				defaultHandler="MonoDevelop.Debugger.Adapter.SelectActiveConfigurationCommandHandler"
-				_label="_Active Launch Configuration" />
+				_label="_Active Launch Configuration"
+				defaultHandler="MonoDevelop.Debugger.Adapter.SelectActiveConfigurationCommandHandler" />
+			<Command
+				id="MonoDevelop.Debugger.Adapter.Commands.DebugActiveConfiguration"
+				_description="Launches a debug adapter for the active launch configuration"
+				_label="Run Active Launch Configuration"
+				defaultHandler="MonoDevelop.Debugger.Adapter.DebugActiveConfigurationHandler" />
 		</Category>
 	</Extension>
 
@@ -24,17 +29,18 @@
 			id="MonoDevelop.Debugger.Adapter.Commands.Launch"
 			insertafter="MonoDevelop.Debugger.DebugCommands.Detach"
 			insertbefore="MonoDevelop.Debugger.SteppingSection" />
-	</Extension>
-
-	<Extension path="/MonoDevelop/Ide/MainMenu/Run">
 		<ItemSet
 			id="MonoDevelop.Debugger.Adapter.SelectActiveConfiguration"
 			_label="_Active Launch Configuration"
 			autohide="true"
-			insertafter="MonoDevelop.Debugger.DebugCommands.Detach"
+			insertafter="MonoDevelop.Debugger.Adapter.Commands.Launch"
 			insertbefore="MonoDevelop.Debugger.SteppingSection">
 			<CommandItem id="MonoDevelop.Debugger.Adapter.Commands.SelectActiveConfiguration" />
 		</ItemSet>
+		<CommandItem
+			id="MonoDevelop.Debugger.Adapter.Commands.DebugActiveConfiguration"
+			insertafter="MonoDevelop.Debugger.DebugCommands.Detach"
+			insertbefore="MonoDevelop.Debugger.SteppingSection" />
 	</Extension>
 
 	<Extension path="/MonoDevelop/Debugging/DebuggerEngines">
