@@ -127,6 +127,8 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			var initialize = new InitializeRequest ();
 			initialize.Args.AdapterID = "Test";
+			initialize.Args.ClientID = BrandingService.ApplicationName;
+			initialize.Args.PathFormat = InitializeArguments.PathFormatValue.Path;
 			initializeResponse = debugAdapterHost.Protocol.SendRequestSync (initialize);
 		}
 
