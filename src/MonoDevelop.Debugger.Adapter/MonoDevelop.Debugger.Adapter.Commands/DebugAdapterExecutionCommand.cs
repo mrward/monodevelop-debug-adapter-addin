@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 
 using MonoDevelop.Core.Execution;
+using System.IO;
 
 namespace MonoDevelop.Debugger.Adapter.Commands
 {
@@ -38,6 +39,15 @@ namespace MonoDevelop.Debugger.Adapter.Commands
 			Context = context;
 
 			Command = launchConfig.Adapter;
+		}
+
+		public string GetTitle ()
+		{
+			if (Context.FileName.IsNull) {
+				return Path.GetFileName (Command);
+			}
+
+			return Context.FileName.FileName;
 		}
 
 		public LaunchConfiguration LaunchConfiguration { get; set; }

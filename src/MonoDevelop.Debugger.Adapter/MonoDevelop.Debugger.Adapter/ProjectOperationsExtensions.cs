@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.IO;
 using MonoDevelop.Core;
 using MonoDevelop.Debugger.Adapter.Commands;
 using MonoDevelop.Ide;
@@ -35,7 +34,7 @@ namespace MonoDevelop.Debugger.Adapter
 	{
 		public static AsyncOperation DebugApplication (this ProjectOperations operations, DebugAdapterExecutionCommand command)
 		{
-			string title = Path.GetFileName (command.Command);
+			string title = command.GetTitle ();
 			var monitor = IdeApp.Workbench.ProgressMonitors.GetRunProgressMonitor (title);
 
 			var debugOperation = DebuggingService.Run (command, monitor.Console);
