@@ -65,14 +65,15 @@ namespace MonoDevelop.Debugger.Adapter
 		public ProcessStartInfo GetProcessStartInfo ()
 		{
 			string fileName = Adapter;
-			string arguments = null;
-			var stringTagModel = new LaunchConfigurationStringTagModel (command.Context);
+			string arguments = command.LaunchConfiguration.AdapterArgs ?? string.Empty;
 
 			string monoPath = GetMonoPath ();
 			if (monoPath != null) {
 				fileName = monoPath;
-				arguments = "\"" + ParseString (Adapter, stringTagModel) + "\"";
+				arguments += " \"" + Adapter + "\"";
 			}
+
+			var stringTagModel = new LaunchConfigurationStringTagModel (command.Context);
 
 			return new ProcessStartInfo {
 				FileName = ParseString (fileName, stringTagModel),

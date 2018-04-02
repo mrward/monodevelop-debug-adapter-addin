@@ -39,6 +39,7 @@ namespace MonoDevelop.Debugger.Adapter.Commands
 			Context = context;
 
 			Command = launchConfig.Adapter;
+			Arguments = launchConfig.AdapterArgs;
 		}
 
 		public string GetTitle ()

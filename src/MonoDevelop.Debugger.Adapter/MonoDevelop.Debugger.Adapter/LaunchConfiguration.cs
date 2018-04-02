@@ -64,6 +64,9 @@ namespace MonoDevelop.Debugger.Adapter
 		[JsonProperty ("$adapter")]
 		public string Adapter { get; set; }
 
+		[JsonProperty ("$adapterArgs")]
+		public string AdapterArgs { get; set; }
+
 		[JsonProperty ("program")]
 		public string Program { get; set; }
 
@@ -123,13 +126,6 @@ namespace MonoDevelop.Debugger.Adapter
 				}
 			}
 
-			// Special case 'node'.
-			if (string.IsNullOrEmpty (config.Adapter)) {
-				if (config.Type == "node") {
-					config.Adapter = "node";
-				}
-			}
-
 			return config;
 		}
 
@@ -143,6 +139,8 @@ namespace MonoDevelop.Debugger.Adapter
 			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "$adapter")) {
 				Adapter = FixRelativePath (fileName.ParentDirectory, value.ToString ());
 				properties [name] = new JValue (Adapter);
+			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "$adapterArgs")) {
+				AdapterArgs = value.ToString ();
 			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "request")) {
 				Request = value.ToString ();
 			} else if (StringComparer.OrdinalIgnoreCase.Equals (name, "type")) {
