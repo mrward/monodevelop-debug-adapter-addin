@@ -158,11 +158,15 @@ namespace MonoDevelop.Debugger.Adapter
 				return fileName;
 			}
 
+			if (fileName.Contains ("${")) {
+				return fileName;
+			}
+
 			if (Path.IsPathRooted (fileName)) {
 				return fileName;
 			}
 
-			return Path.Combine (baseDirectory, fileName);
+			return Path.GetFullPath (Path.Combine (baseDirectory, fileName));
 		}
 	}
 }

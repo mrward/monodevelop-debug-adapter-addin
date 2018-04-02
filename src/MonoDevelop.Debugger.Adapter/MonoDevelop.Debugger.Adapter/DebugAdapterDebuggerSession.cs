@@ -140,7 +140,7 @@ namespace MonoDevelop.Debugger.Adapter
 
 		void OnLaunch (DebugAdapterDebuggerStartInfo startInfo)
 		{
-			var launchRequest = new LaunchRequest (false, startInfo.LaunchConfiguration.Properties);
+			var launchRequest = new LaunchRequest (false, startInfo.GetLaunchProperties ());
 			debugAdapterHost.Protocol.SendRequestSync (launchRequest);
 		}
 

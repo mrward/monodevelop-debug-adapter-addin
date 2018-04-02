@@ -24,11 +24,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Mono.Debugging.Client;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
+using MonoDevelop.Core.StringParsing;
 using MonoDevelop.Debugger.Adapter.Commands;
+using Newtonsoft.Json.Linq;
 
 namespace MonoDevelop.Debugger.Adapter
 {
@@ -62,16 +66,17 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			string fileName = Adapter;
 			string arguments = null;
+			var stringTagModel = new LaunchConfigurationStringTagModel (command.Context);
 
 			string monoPath = GetMonoPath ();
 			if (monoPath != null) {
 				fileName = monoPath;
-				arguments = "\"" + Adapter + "\"";
+				arguments = "\"" + ParseString (Adapter, stringTagModel) + "\"";
 			}
 
 			return new ProcessStartInfo {
-				FileName = fileName,
-				Arguments = arguments,
+				FileName = ParseString (fileName, stringTagModel),
+				Arguments = ParseString (arguments, stringTagModel),
 				RedirectStandardInput = true,
 				RedirectStandardOutput = true,
 				UseShellExecute = false,
@@ -99,6 +104,32 @@ namespace MonoDevelop.Debugger.Adapter
 			}
 
 			return false;
+		}
+
+		static string ParseString (string text, IStringTagModel stringTagModel)
+		{
+			if (string.IsNullOrEmpty (text))
+				return string.Empty;
+
+			return StringParserService.Parse (text, stringTagModel);
+		}
+
+		public Dictionary<string, JToken> GetLaunchProperties ()
+		{
+			var properties = new Dictionary<string, JToken> ();
+			var stringTagModel = new LaunchConfigurationStringTagModel (command.Context);
+
+			foreach (KeyValuePair<string, JToken> property in LaunchConfiguration.Properties) {
+				var jvalue = property.Value as JValue;
+				if (jvalue != null && jvalue.Type == JTokenType.String) {
+					string value = ParseString (property.Value.ToString (), stringTagModel);
+					properties [property.Key] = new JValue (value);
+				} else {
+					properties [property.Key] = property.Value;
+				}
+			}
+
+			return properties;
 		}
 	}
 }

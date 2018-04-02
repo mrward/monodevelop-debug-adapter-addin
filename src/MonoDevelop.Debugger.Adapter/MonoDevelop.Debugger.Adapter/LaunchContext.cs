@@ -1,5 +1,5 @@
 ﻿//
-// DebugActiveConfigurationHandler.cs
+// LaunchContext.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,40 +24,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Components.Commands;
-using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
+using MonoDevelop.Core;
 
-namespace MonoDevelop.Debugger.Adapter.Commands
+namespace MonoDevelop.Debugger.Adapter
 {
-	class DebugActiveConfigurationHandler : CommandHandler
+	class LaunchContext
 	{
-		protected override void Update (CommandInfo info)
+		public LaunchContext ()
+			: this (FilePath.Null)
 		{
-			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
-
-			if (configuration == null) {
-				info.Visible = false;
-			} else {
-				info.Enabled = configuration.Id != LaunchConfiguration.NoneConfigurationId;
-				info.Visible = true;
-			}
 		}
 
-		LaunchConfiguration GetActiveLaunchConfiguration ()
+		public LaunchContext (FilePath fileName)
 		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-			return DebugAdapterService.GetActiveLaunchConfiguration (document);
+			FileName = fileName;
 		}
 
-		protected override void Run (object dataItem)
-		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-			LaunchConfiguration configuration = DebugAdapterService.GetActiveLaunchConfiguration (document);
-			if (configuration != null) {
-				var context = new LaunchContext (document.FileName);
-				DebugAdapterService.LaunchAdapter (configuration, context);
-			}
-		}
+		public FilePath FileName { get; set; }
 	}
 }

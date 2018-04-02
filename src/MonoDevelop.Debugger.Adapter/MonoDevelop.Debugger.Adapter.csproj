@@ -48,6 +48,8 @@
     <Compile Include="MonoDevelop.Debugger.Adapter.Commands\DebugActiveConfigurationHandler.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter.Commands\LaunchDebugAdapterHandler.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter.Commands\DebugAdapterExecutionCommand.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchContext.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationStringTagModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />

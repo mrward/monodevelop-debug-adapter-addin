@@ -39,12 +39,12 @@ namespace MonoDevelop.Debugger.Adapter
 		public static void LaunchAdapter (FilePath launchJsonFile)
 		{
 			var configuration = LaunchConfiguration.Read (launchJsonFile);
-			LaunchAdapter (configuration);
+			LaunchAdapter (configuration, new LaunchContext ());
 		}
 
-		public static void LaunchAdapter (LaunchConfiguration configuration)
+		public static void LaunchAdapter (LaunchConfiguration configuration, LaunchContext context)
 		{
-			var debugAdapterCommand = new DebugAdapterExecutionCommand (configuration);
+			var debugAdapterCommand = new DebugAdapterExecutionCommand (configuration, context);
 
 			IdeApp.ProjectOperations.DebugApplication (debugAdapterCommand);
 		}

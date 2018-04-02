@@ -1,5 +1,5 @@
 ﻿//
-// DebugActiveConfigurationHandler.cs
+// LaunchConfigurationStringTagModel.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,40 +24,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Components.Commands;
-using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
+using System;
+using MonoDevelop.Core.StringParsing;
 
-namespace MonoDevelop.Debugger.Adapter.Commands
+namespace MonoDevelop.Debugger.Adapter
 {
-	class DebugActiveConfigurationHandler : CommandHandler
+	class LaunchConfigurationStringTagModel : IStringTagModel
 	{
-		protected override void Update (CommandInfo info)
-		{
-			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
+		LaunchContext context;
 
-			if (configuration == null) {
-				info.Visible = false;
-			} else {
-				info.Enabled = configuration.Id != LaunchConfiguration.NoneConfigurationId;
-				info.Visible = true;
-			}
+		public LaunchConfigurationStringTagModel (LaunchContext context)
+		{
+			this.context = context;
 		}
 
-		LaunchConfiguration GetActiveLaunchConfiguration ()
+		public object GetValue (string name)
 		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-			return DebugAdapterService.GetActiveLaunchConfiguration (document);
-		}
-
-		protected override void Run (object dataItem)
-		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-			LaunchConfiguration configuration = DebugAdapterService.GetActiveLaunchConfiguration (document);
-			if (configuration != null) {
-				var context = new LaunchContext (document.FileName);
-				DebugAdapterService.LaunchAdapter (configuration, context);
+			if (StringComparer.OrdinalIgnoreCase.Equals ("file", name)) {
+				return context.FileName.ToString ();
 			}
+
+			if (StringComparer.OrdinalIgnoreCase.Equals ("workspaceRoot", name) ||
+				StringComparer.OrdinalIgnoreCase.Equals ("workspaceFolder", name)) {
+
+				if (context.FileName.IsNotNull) {
+					return context.FileName.ParentDirectory.ToString ();
+				}
+			}
+
+			return null;
 		}
 	}
 }

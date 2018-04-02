@@ -30,13 +30,17 @@ namespace MonoDevelop.Debugger.Adapter.Commands
 {
 	class DebugAdapterExecutionCommand : NativeExecutionCommand
 	{
-		public DebugAdapterExecutionCommand (LaunchConfiguration launchConfig)
+		public DebugAdapterExecutionCommand (
+			LaunchConfiguration launchConfig,
+			LaunchContext context)
 		{
 			LaunchConfiguration = launchConfig;
+			Context = context;
 
 			Command = launchConfig.Adapter;
 		}
 
 		public LaunchConfiguration LaunchConfiguration { get; set; }
+		public LaunchContext Context { get; set; }
 	}
 }
