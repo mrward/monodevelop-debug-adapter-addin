@@ -26,6 +26,7 @@
 
 using System.Collections.Generic;
 using MonoDevelop.Core;
+using MonoDevelop.Debugger.Adapter.Commands;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Gui;
 

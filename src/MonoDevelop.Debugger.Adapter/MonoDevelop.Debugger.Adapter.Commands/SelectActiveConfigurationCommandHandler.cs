@@ -1,5 +1,5 @@
 ﻿//
-// DebugAdapterExecutionCommand.cs
+// SelectActiveConfigurationCommandHandler.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,19 +24,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Core.Execution;
+using System.Linq;
+using MonoDevelop.Components.Commands;
+using MonoDevelop.Ide;
+using MonoDevelop.Ide.Gui;
 
-namespace MonoDevelop.Debugger.Adapter
+namespace MonoDevelop.Debugger.Adapter.Commands
 {
-	class DebugAdapterExecutionCommand : NativeExecutionCommand
+	class SelectActiveConfigurationCommandHandler: CommandHandler
 	{
-		public DebugAdapterExecutionCommand (LaunchConfiguration launchConfig)
+		protected override void Update (CommandArrayInfo info)
 		{
-			LaunchConfiguration = launchConfig;
+			Document document = IdeApp.Workbench.ActiveDocument;
 
-			Command = launchConfig.Adapter;
+			var configurations = DebugAdapterService.GetLaunchConfigurations (document);
+			if (!configurations.Any ()) {
+				info.Bypass = true;
+				return;
+			}
+
+			foreach (LaunchConfiguration config in configurations) {
+				CommandInfo item = info.Add (config.Name, config);
+				item.Checked = config.IsActive;
+			}
 		}
 
-		public LaunchConfiguration LaunchConfiguration { get; set; }
+		protected override void Run (object dataItem)
+		{
+			Document document = IdeApp.Workbench.ActiveDocument;
+			var config = dataItem as LaunchConfiguration;
+			DebugAdapterService.SetActiveLaunchConfiguration (config, document);
+		}
 	}
 }

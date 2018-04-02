@@ -1,5 +1,5 @@
 ﻿//
-// LaunchDebugAdapterHandler.cs
+// DebugActiveConfigurationHandler.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,51 +24,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Components;
 using MonoDevelop.Components.Commands;
-using MonoDevelop.Core;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui.Dialogs;
+using MonoDevelop.Ide.Gui;
 
-namespace MonoDevelop.Debugger.Adapter
+namespace MonoDevelop.Debugger.Adapter.Commands
 {
-	class LaunchDebugAdapterHandler : CommandHandler
+	class DebugActiveConfigurationHandler : CommandHandler
 	{
-		protected override void Run ()
+		protected override void Update (CommandInfo info)
 		{
-			try {
-				OnLaunchDebugAdapter ();
-			} catch (Exception ex) {
-				LoggingService.LogError ("Failed to launch debug adapter", ex);
-				MessageService.ShowError (ex.Message);
+			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
+
+			if (configuration == null) {
+				info.Visible = false;
+			} else {
+				info.Enabled = configuration.Id != LaunchConfiguration.NoneConfigurationId;
+				info.Visible = true;
 			}
 		}
 
-		void OnLaunchDebugAdapter ()
+		LaunchConfiguration GetActiveLaunchConfiguration ()
 		{
-			FilePath launchJsonFile = SelectLaunchJsonFile ();
-			if (launchJsonFile.IsNotNull) {
-				DebugAdapterService.LaunchAdapter (launchJsonFile);
-			}
+			Document document = IdeApp.Workbench.ActiveDocument;
+			return DebugAdapterService.GetActiveLaunchConfiguration (document);
 		}
 
-		FilePath SelectLaunchJsonFile ()
+		protected override void Run (object dataItem)
 		{
-			var dialog = new OpenFileDialog ();
-			dialog.Action = FileChooserAction.Open;
-			dialog.Title = GettextCatalog.GetString ("Launch Debug Adapter");
-
-			// 'launch.json' as a file filter does not work so use a wildcard version.
-			dialog.AddFilter (GettextCatalog.GetString ("Launch Files (launch.json)"), "*launch*.json");
-			dialog.AddFilter (GettextCatalog.GetString ("Json Files (*.json)"), "*.json");
-			dialog.AddAllFilesFilter ();
-
-			if (dialog.Run ()) {
-				return dialog.SelectedFile;
+			LaunchConfiguration configuration = GetActiveLaunchConfiguration ();
+			if (configuration != null) {
+				DebugAdapterService.LaunchAdapter (configuration);
 			}
-
-			return null;
 		}
 	}
 }

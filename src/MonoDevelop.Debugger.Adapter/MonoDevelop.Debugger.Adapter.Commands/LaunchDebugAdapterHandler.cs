@@ -1,5 +1,5 @@
 ﻿//
-// SelectActiveConfigurationCommandHandler.cs
+// LaunchDebugAdapterHandler.cs
 //
 // Author:
 //       Matt Ward <matt.ward@microsoft.com>
@@ -24,36 +24,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System.Linq;
+using System;
+using MonoDevelop.Components;
 using MonoDevelop.Components.Commands;
+using MonoDevelop.Core;
 using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
+using MonoDevelop.Ide.Gui.Dialogs;
 
-namespace MonoDevelop.Debugger.Adapter
+namespace MonoDevelop.Debugger.Adapter.Commands
 {
-	class SelectActiveConfigurationCommandHandler: CommandHandler
+	class LaunchDebugAdapterHandler : CommandHandler
 	{
-		protected override void Update (CommandArrayInfo info)
+		protected override void Run ()
 		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-
-			var configurations = DebugAdapterService.GetLaunchConfigurations (document);
-			if (!configurations.Any ()) {
-				info.Bypass = true;
-				return;
-			}
-
-			foreach (LaunchConfiguration config in configurations) {
-				CommandInfo item = info.Add (config.Name, config);
-				item.Checked = config.IsActive;
+			try {
+				OnLaunchDebugAdapter ();
+			} catch (Exception ex) {
+				LoggingService.LogError ("Failed to launch debug adapter", ex);
+				MessageService.ShowError (ex.Message);
 			}
 		}
 
-		protected override void Run (object dataItem)
+		void OnLaunchDebugAdapter ()
 		{
-			Document document = IdeApp.Workbench.ActiveDocument;
-			var config = dataItem as LaunchConfiguration;
-			DebugAdapterService.SetActiveLaunchConfiguration (config, document);
+			FilePath launchJsonFile = SelectLaunchJsonFile ();
+			if (launchJsonFile.IsNotNull) {
+				DebugAdapterService.LaunchAdapter (launchJsonFile);
+			}
+		}
+
+		FilePath SelectLaunchJsonFile ()
+		{
+			var dialog = new OpenFileDialog ();
+			dialog.Action = FileChooserAction.Open;
+			dialog.Title = GettextCatalog.GetString ("Launch Debug Adapter");
+
+			// 'launch.json' as a file filter does not work so use a wildcard version.
+			dialog.AddFilter (GettextCatalog.GetString ("Launch Files (launch.json)"), "*launch*.json");
+			dialog.AddFilter (GettextCatalog.GetString ("Json Files (*.json)"), "*.json");
+			dialog.AddAllFilesFilter ();
+
+			if (dialog.Run ()) {
+				return dialog.SelectedFile;
+			}
+
+			return null;
 		}
 	}
 }

@@ -26,6 +26,7 @@
 
 using Mono.Debugging.Client;
 using MonoDevelop.Core.Execution;
+using MonoDevelop.Debugger.Adapter.Commands;
 
 namespace MonoDevelop.Debugger.Adapter
 {

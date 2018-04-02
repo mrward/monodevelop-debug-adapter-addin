@@ -33,21 +33,21 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AddinInfo.cs" />
-    <Compile Include="MonoDevelop.Debugger.Adapter\LaunchDebugAdapterHandler.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterService.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfiguration.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\MonoDevelopDebugAdapterHost.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerEngine.cs" />
-    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterExecutionCommand.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerSession.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterDebuggerStartInfo.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\ProjectOperationsExtensions.cs" />
-    <Compile Include="MonoDevelop.Debugger.Adapter\SelectActiveConfigurationCommandHandler.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurations.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationCacheInfo.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationsReader.cs" />
-    <Compile Include="MonoDevelop.Debugger.Adapter\DebugActiveConfigurationHandler.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DocumentExtensions.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter.Commands\SelectActiveConfigurationCommandHandler.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter.Commands\DebugActiveConfigurationHandler.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter.Commands\LaunchDebugAdapterHandler.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter.Commands\DebugAdapterExecutionCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />

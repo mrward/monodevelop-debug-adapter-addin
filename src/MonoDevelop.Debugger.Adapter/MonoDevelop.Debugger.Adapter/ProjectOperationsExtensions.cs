@@ -26,6 +26,7 @@
 
 using System.IO;
 using MonoDevelop.Core;
+using MonoDevelop.Debugger.Adapter.Commands;
 using MonoDevelop.Ide;
 
 namespace MonoDevelop.Debugger.Adapter

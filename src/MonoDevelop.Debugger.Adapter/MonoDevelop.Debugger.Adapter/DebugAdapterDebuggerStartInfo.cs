@@ -28,6 +28,7 @@ using System.Diagnostics;
 using Mono.Debugging.Client;
 using MonoDevelop.Core;
 using MonoDevelop.Core.Assemblies;
+using MonoDevelop.Debugger.Adapter.Commands;
 
 namespace MonoDevelop.Debugger.Adapter
 {

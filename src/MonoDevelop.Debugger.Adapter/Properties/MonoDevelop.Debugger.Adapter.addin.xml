@@ -9,18 +9,18 @@
 				id="MonoDevelop.Debugger.Adapter.Commands.Launch"
 				_description="Launches a debug adapter"
 				_label="Launch Debug Adapter…"
-				defaultHandler="MonoDevelop.Debugger.Adapter.LaunchDebugAdapterHandler" />
+				defaultHandler="MonoDevelop.Debugger.Adapter.Commands.LaunchDebugAdapterHandler" />
 			<Command
 				id="MonoDevelop.Debugger.Adapter.Commands.SelectActiveConfiguration"
 				type="radio|array"
 				_description="Selects the active launch configuration from the launch.json file."
 				_label="_Active Launch Configuration"
-				defaultHandler="MonoDevelop.Debugger.Adapter.SelectActiveConfigurationCommandHandler" />
+				defaultHandler="MonoDevelop.Debugger.Adapter.Commands.SelectActiveConfigurationCommandHandler" />
 			<Command
 				id="MonoDevelop.Debugger.Adapter.Commands.DebugActiveConfiguration"
 				_description="Launches a debug adapter for the active launch configuration"
 				_label="Run Active Launch Configuration"
-				defaultHandler="MonoDevelop.Debugger.Adapter.DebugActiveConfigurationHandler" />
+				defaultHandler="MonoDevelop.Debugger.Adapter.Commands.DebugActiveConfigurationHandler" />
 		</Category>
 	</Extension>
 
