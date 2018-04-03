@@ -220,7 +220,6 @@ namespace MonoDevelop.Debugger.VsCodeDebugProtocol
 			StartDebugAgent ();
 			LaunchRequest launchRequest = CreateLaunchRequest (startInfo);
 			protocolClient.SendRequestSync (launchRequest);
-			protocolClient.SendRequestSync (new ConfigurationDoneRequest ());
 		}
 
 		protected void Attach (long processId)
@@ -272,7 +271,7 @@ namespace MonoDevelop.Debugger.VsCodeDebugProtocol
 			Task.Run (() => {
 				switch (obj.EventType) {
 				case "initialized":
-					//OnStarted();
+					OnInitialized ();
 					break;
 				case "stopped":
 					TargetEventArgs args;
@@ -344,6 +343,16 @@ namespace MonoDevelop.Debugger.VsCodeDebugProtocol
 					break;
 				}
 			});
+		}
+
+		/// <summary>
+		/// After the debug adapter sends the Initialize event the breakpoints can be configured
+		/// and we can send the ConfigurationDoneRequest if the adapter supports it
+		/// </summary>
+		protected virtual void OnInitialized ()
+		{
+			if (Capabilities.SupportsConfigurationDoneRequest == true)
+				protocolClient.SendRequestSync (new ConfigurationDoneRequest ());
 		}
 
 		List<string> pathsWithBreakpoints = new List<string> ();
