@@ -30,206 +30,71 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Client;
 using MonoDevelop.Core;
+using MonoDevelop.Debugger.VsCodeDebugProtocol;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	class DebugAdapterDebuggerSession : DebuggerSession
+	class DebugAdapterDebuggerSession : VSCodeDebuggerSession
 	{
-		MonoDevelopDebugAdapterHost debugAdapterHost;
-		InitializeResponse initializeResponse;
-
-		protected override void OnAttachToProcess (long processId)
-		{
-			throw new NotImplementedException ();
-		}
-
-		protected override void OnContinue ()
-		{
-		}
-
-		protected override void OnDetach ()
-		{
-			throw new NotImplementedException ();
-		}
-
-		protected override void OnEnableBreakEvent (BreakEventInfo eventInfo, bool enable)
-		{
-		}
-
-		protected override void OnFinish ()
-		{
-		}
-
-		protected override ProcessInfo[] OnGetProcesses ()
-		{
-			return new [] {
-				new ProcessInfo (1, "DebugAdapter")
-			};
-		}
-
-		protected override Backtrace OnGetThreadBacktrace (long processId, long threadId)
-		{
-			throw new NotImplementedException ();
-		}
-
-		protected override ThreadInfo[] OnGetThreads (long processId)
-		{
-			return new [] {
-				new ThreadInfo (processId, 1, "Main Thread", string.Empty)
-			};
-		}
-
-		protected override BreakEventInfo OnInsertBreakEvent (BreakEvent breakEvent)
-		{
-			throw new NotImplementedException ();
-		}
-
-		protected override void OnNextInstruction ()
-		{
-		}
-
-		protected override void OnNextLine ()
-		{
-		}
-
-		protected override void OnRemoveBreakEvent (BreakEventInfo eventInfo)
-		{
-		}
+		DebugAdapterDebuggerStartInfo debugAdapterStartInfo;
+		ProcessStartInfo processStartInfo;
 
 		protected override void OnRun (DebuggerStartInfo startInfo)
 		{
-			if (HasExited)
-				throw new UserException (GettextCatalog.GetString ("Debug adapter has exited."));
+			debugAdapterStartInfo = (DebugAdapterDebuggerStartInfo)startInfo;
+			processStartInfo = debugAdapterStartInfo.GetProcessStartInfo ();
 
-			try {
-				var debugAdapterStartInfo = (DebugAdapterDebuggerStartInfo)startInfo;
-				var process = new Process ();
-				process.StartInfo = debugAdapterStartInfo.GetProcessStartInfo ();
-				if (!process.Start ()) {
-					LoggingService.LogError ("Failed to launch Debug Adapter. {0}", debugAdapterStartInfo);
-					return;
-				}
-
-				debugAdapterHost = new MonoDevelopDebugAdapterHost (this, process);
-				debugAdapterHost.Start ();
-
-				OnInitialize ();
-				OnStarted ();
-
-				OnLaunch (debugAdapterStartInfo);
-			} catch (Exception ex) {
-				LoggingService.LogError ("DebugAdapterDebuggerSession.OnRun error.", ex);
-			}
+			base.OnRun (startInfo);
 		}
 
-		/// <summary>
-		/// After the debug adapter fires the Initialized event we can set breakpoints and
-		/// indicate the configuration is complete.
-		/// </summary>
-		public void OnInitialized ()
+		protected override string GetDebugAdapterPath ()
 		{
-			OnConfigurationComplete ();
+			return processStartInfo.FileName;
 		}
 
-		void OnInitialize ()
+		protected override string GetDebugAdapterArguments ()
 		{
+			return processStartInfo.Arguments;
+		}
+
+		protected override AttachRequest CreateAttachRequest (long processId)
+		{
+			throw new NotImplementedException ();
+		}
+
+		protected override InitializeRequest CreateInitRequest ()
+		{
+			base.protocolClient.LogMessage += ProtocolClientLogMessage;
+
 			var initialize = new InitializeRequest ();
 			initialize.Args.AdapterID = "Test";
 			initialize.Args.ClientID = BrandingService.ApplicationName;
+			initialize.Args.LinesStartAt1 = true;
+			initialize.Args.ColumnsStartAt1 = true;
 			initialize.Args.PathFormat = InitializeArguments.PathFormatValue.Path;
-			initializeResponse = debugAdapterHost.Protocol.SendRequestSync (initialize);
+			initialize.Args.SupportsVariableType = true;
+			initialize.Args.SupportsVariablePaging = false;
+			initialize.Args.SupportsRunInTerminalRequest = true;
+			initialize.Args.SupportsHandshakeRequest = false;
+
+			return initialize;
 		}
 
-		void OnConfigurationComplete ()
+		protected override LaunchRequest CreateLaunchRequest (DebuggerStartInfo startInfo)
 		{
-			if (initializeResponse.SupportsConfigurationDoneRequest == true) {
-				var configurationDoneRequest = new ConfigurationDoneRequest ();
-				debugAdapterHost.Protocol.SendRequest (configurationDoneRequest, _ => {}, OnConfigurationCompleteError);
-			}
+			debugAdapterStartInfo = (DebugAdapterDebuggerStartInfo)startInfo;
+			return new LaunchRequest (false, debugAdapterStartInfo.GetLaunchProperties ());
 		}
 
-		void OnConfigurationCompleteError (ConfigurationDoneArguments args, ProtocolException ex)
+		void ProtocolClientLogMessage (object sender, LogEventArgs e)
 		{
-			OnDebuggerOutput (true, ex.ToString ());
-			LoggingService.LogError ("ConfigurationComplete error.", ex);
+			OnLogMessage (e.Category, e.Message);
 		}
 
-		void OnLaunch (DebugAdapterDebuggerStartInfo startInfo)
-		{
-			var launchRequest = new LaunchRequest (false, startInfo.GetLaunchProperties ());
-			debugAdapterHost.Protocol.SendRequestSync (launchRequest);
-		}
-
-		protected override void OnSetActiveThread (long processId, long threadId)
-		{
-		}
-
-		protected override void OnStepInstruction ()
-		{
-		}
-
-		protected override void OnStepLine ()
-		{
-		}
-
-		protected override void OnStop ()
-		{
-		}
-
-		protected override void OnUpdateBreakEvent (BreakEventInfo eventInfo)
-		{
-		}
-
-		public override void Dispose ()
-		{
-			try {
-				var host = debugAdapterHost;
-				debugAdapterHost = null;
-				if (host != null) {
-					host.Protocol.Stop ();
-				}
-			} catch (Exception ex) {
-				LoggingService.LogError ("DebugAdapterDebuggerSession.Dispose error", ex);
-			}
-			base.Dispose ();
-		}
-
-		protected override void OnExit ()
-		{
-			HasExited = true;
-
-			try {
-				var host = debugAdapterHost;
-				debugAdapterHost = null;
-
-				if (host != null) {
-					var request = new DisconnectRequest ();
-					host.Protocol.SendRequestSync (request);
-					host.Protocol.Stop ();
-				}
-			} catch (Exception ex) {
-				LoggingService.LogError ("DebugAdapterDebuggerSession.OnExit error.", ex);
-			}
-		}
-
-		internal void OnLogMessage (LogCategory category, string message)
+		void OnLogMessage (LogCategory category, string message)
 		{
 			bool standardError = category == LogCategory.Warning;
 			OnDebuggerOutput (standardError, message + Environment.NewLine);
-		}
-
-		internal void OnTerminated ()
-		{
-			var eventArgs = new TargetEventArgs (TargetEventType.TargetExited);
-			OnTargetEvent (eventArgs);
-		}
-
-		internal void OnExited (int exitCode)
-		{
-			var eventArgs = new TargetEventArgs (TargetEventType.TargetExited) {
-				ExitCode = exitCode
-			};
-			OnTargetEvent (eventArgs);
 		}
 	}
 }
