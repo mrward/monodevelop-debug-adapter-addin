@@ -26,6 +26,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Mono.Debugging.Client;
@@ -86,6 +87,16 @@ namespace MonoDevelop.Debugger.Adapter
 			return new LaunchRequest (false, debugAdapterStartInfo.GetLaunchProperties ());
 		}
 
+		protected override void OnInitialized ()
+		{
+			OnStarted ();
+			// Hack. Wait a bit for breakpoint responses.
+			// Need a way to wait until the breakpoints have been configured before sending the
+			// ConfigurationDone request.
+			System.Threading.Thread.Sleep (1000);
+			base.OnInitialized ();
+		}
+
 		void ProtocolClientLogMessage (object sender, LogEventArgs e)
 		{
 			OnLogMessage (e.Category, e.Message);
@@ -95,6 +106,18 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			bool standardError = category == LogCategory.Warning;
 			OnDebuggerOutput (standardError, message + Environment.NewLine);
+		}
+
+		protected override ProcessInfo[] OnGetProcesses ()
+		{
+			var processes = base.OnGetProcesses ();
+			if (processes.Length > 0) {
+				return processes;
+			}
+
+			return new [] {
+				new ProcessInfo (1, Path.GetFileName (debugAdapterStartInfo.Command))
+			};
 		}
 	}
 }
