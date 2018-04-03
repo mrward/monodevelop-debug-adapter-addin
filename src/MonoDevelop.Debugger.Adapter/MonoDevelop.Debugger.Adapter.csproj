@@ -50,6 +50,10 @@
     <Compile Include="MonoDevelop.Debugger.Adapter.Commands\DebugAdapterExecutionCommand.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchContext.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\LaunchConfigurationStringTagModel.cs" />
+    <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeBacktrace.cs" />
+    <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VSCodeDebuggerSession.cs" />
+    <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeObjectSource.cs" />
+    <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeStackFrame.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />
