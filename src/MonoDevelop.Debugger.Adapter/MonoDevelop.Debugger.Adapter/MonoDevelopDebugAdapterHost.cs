@@ -81,5 +81,10 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			session.OnExited (body.ExitCode);
 		}
+
+		protected override void HandleInitializedEvent (InitializedEvent body)
+		{
+			session.OnInitialized ();
+		}
 	}
 }

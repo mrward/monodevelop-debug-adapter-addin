@@ -117,10 +117,18 @@ namespace MonoDevelop.Debugger.Adapter
 				OnStarted ();
 
 				OnLaunch (debugAdapterStartInfo);
-				OnConfigurationComplete ();
 			} catch (Exception ex) {
 				LoggingService.LogError ("DebugAdapterDebuggerSession.OnRun error.", ex);
 			}
+		}
+
+		/// <summary>
+		/// After the debug adapter fires the Initialized event we can set breakpoints and
+		/// indicate the configuration is complete.
+		/// </summary>
+		public void OnInitialized ()
+		{
+			OnConfigurationComplete ();
 		}
 
 		void OnInitialize ()
@@ -136,8 +144,14 @@ namespace MonoDevelop.Debugger.Adapter
 		{
 			if (initializeResponse.SupportsConfigurationDoneRequest == true) {
 				var configurationDoneRequest = new ConfigurationDoneRequest ();
-				debugAdapterHost.Protocol.SendRequestSync (configurationDoneRequest);
+				debugAdapterHost.Protocol.SendRequest (configurationDoneRequest, _ => {}, OnConfigurationCompleteError);
 			}
+		}
+
+		void OnConfigurationCompleteError (ConfigurationDoneArguments args, ProtocolException ex)
+		{
+			OnDebuggerOutput (true, ex.ToString ());
+			LoggingService.LogError ("ConfigurationComplete error.", ex);
 		}
 
 		void OnLaunch (DebugAdapterDebuggerStartInfo startInfo)
