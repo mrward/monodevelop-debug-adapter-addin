@@ -118,19 +118,43 @@ namespace MonoDevelop.Debugger.Adapter
 		public Dictionary<string, JToken> GetLaunchProperties ()
 		{
 			var properties = new Dictionary<string, JToken> ();
+
 			var stringTagModel = new LaunchConfigurationStringTagModel (command.Context);
 
 			foreach (KeyValuePair<string, JToken> property in LaunchConfiguration.Properties) {
 				var jvalue = property.Value as JValue;
 				if (jvalue != null && jvalue.Type == JTokenType.String) {
-					string value = ParseString (property.Value.ToString (), stringTagModel);
-					properties [property.Key] = new JValue (value);
+					properties [property.Key] = ParseString (jvalue, stringTagModel);
+				} else if (property.Value is JArray array) {
+					properties [property.Key] = ParseArray (array, stringTagModel);
 				} else {
 					properties [property.Key] = property.Value;
 				}
 			}
 
 			return properties;
+		}
+
+		static JValue ParseString (JValue value, IStringTagModel stringTagModel)
+		{
+			string valueText = ParseString (value.ToString (), stringTagModel);
+			return new JValue (valueText);
+		}
+
+		JToken ParseArray (JArray array, LaunchConfigurationStringTagModel stringTagModel)
+		{
+			var convertedArray = new JArray ();
+
+			foreach (JToken item in array) {
+				var jvalue = item as JValue;
+				if (jvalue?.Type == JTokenType.String) {
+					convertedArray.Add (ParseString (jvalue, stringTagModel));
+				} else {
+					convertedArray.Add (item);
+				}
+			}
+
+			return convertedArray;
 		}
 	}
 }
