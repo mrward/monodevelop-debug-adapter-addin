@@ -53,6 +53,7 @@
     <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VSCodeDebuggerSession.cs" />
     <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeObjectSource.cs" />
     <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeStackFrame.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterTextEditorExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />

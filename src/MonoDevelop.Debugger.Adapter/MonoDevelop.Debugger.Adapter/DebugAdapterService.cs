@@ -59,9 +59,17 @@ namespace MonoDevelop.Debugger.Adapter
 			launchConfigurations.SetActiveLaunchConfiguration (config, document);
 		}
 
-		public static LaunchConfiguration GetActiveLaunchConfiguration (Document document)
+		public static LaunchConfiguration GetActiveLaunchConfiguration (Document document, bool allowNoneConfiguration = true)
 		{
-			return launchConfigurations.GetActiveLaunchConfiguration (document);
+			var configuration = launchConfigurations.GetActiveLaunchConfiguration (document);
+
+			if (!allowNoneConfiguration) {
+				if (configuration?.Id == LaunchConfiguration.NoneConfigurationId) {
+					return null;
+				}
+			}
+
+			return configuration;
 		}
 	}
 }

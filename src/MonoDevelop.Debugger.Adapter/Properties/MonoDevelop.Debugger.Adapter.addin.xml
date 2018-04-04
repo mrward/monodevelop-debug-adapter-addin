@@ -51,4 +51,10 @@
 			features="Breakpoints, Pause, Stepping, DebugFile"
 			type="MonoDevelop.Debugger.Adapter.DebugAdapterDebuggerEngine" />
 	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/TextEditorExtensions">
+		<Class
+			id="DebugAdapterEditorExtension"
+			class="MonoDevelop.Debugger.Adapter.DebugAdapterTextEditorExtension" />
+	</Extension>
 </ExtensionModel>
