@@ -24,16 +24,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Text;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using MonoDevelop.Ide.Commands;
+using MonoDevelop.Ide.Editor;
 using MonoDevelop.Ide.Editor.Extension;
 using MonoDevelop.Ide.Gui;
+using MonoDevelop.LanguageServer.Client;
 
 namespace MonoDevelop.Debugger.Adapter
 {
-	class DebugAdapterTextEditorExtension : TextEditorExtension
+	class DebugAdapterTextEditorExtension : TextEditorExtension, IDebuggerExpressionResolver
 	{
 		[CommandUpdateHandler (DebugCommands.Debug)]
 		void OnUpdateDebug (CommandInfo info)
@@ -101,6 +106,28 @@ namespace MonoDevelop.Debugger.Adapter
 		void OnStop ()
 		{
 			DebuggingService.Stop ();
+		}
+
+		public Task<DebugDataTipInfo> ResolveExpressionAsync (
+			IReadonlyTextDocument editor,
+			DocumentContext doc,
+			int offset,
+			CancellationToken cancellationToken)
+		{
+			if (!IsTextEditorExtensionEnabled ()) {
+				return Task.FromResult (new DebugDataTipInfo ());
+			}
+
+			var location = editor.OffsetToLocation (offset);
+			WordAtPosition wordAtPosition = editor.GetWordAtPosition (location.Line, location.Column);
+			if (!wordAtPosition.IsEmpty) {
+				int wordOffset = editor.LocationToOffset (location.Line, wordAtPosition.StartColumn);
+				var span = new TextSpan (wordOffset, wordAtPosition.Length);
+				var tipInfo = new DebugDataTipInfo (span, wordAtPosition.Text);
+				return Task.FromResult (tipInfo);
+			}
+
+			return Task.FromResult (new DebugDataTipInfo ());
 		}
 	}
 }

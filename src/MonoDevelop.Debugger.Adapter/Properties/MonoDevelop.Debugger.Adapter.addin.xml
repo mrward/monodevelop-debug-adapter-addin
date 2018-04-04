@@ -57,4 +57,11 @@
 			id="DebugAdapterEditorExtension"
 			class="MonoDevelop.Debugger.Adapter.DebugAdapterTextEditorExtension" />
 	</Extension>
+
+	<Extension path="/MonoDevelop/Ide/Editor/TooltipProviders">
+		<Provider
+			id="DebugAdapterTooltipProvider"
+			insertafter="Debug"
+			class="MonoDevelop.Debugger.Adapter.DebugAdapterTooltipProvider" />
+	</Extension>
 </ExtensionModel>

@@ -54,6 +54,11 @@
     <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeObjectSource.cs" />
     <Compile Include="MonoDevelop.Debugger.VsCodeDebugProtocol\VsCodeStackFrame.cs" />
     <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterTextEditorExtension.cs" />
+    <Compile Include="MonoDevelop.LanguageServer.Client\TextEditorWords.cs" />
+    <Compile Include="MonoDevelop.LanguageServer.Client\WordAtPosition.cs" />
+    <Compile Include="MonoDevelop.LanguageServer.Client\IReadonlyTextDocumentExtensions.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DebugAdapterTooltipProvider.cs" />
+    <Compile Include="MonoDevelop.Debugger.Adapter\DummyDocumentContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\MonoDevelop.Debugger.Adapter.addin.xml" />
