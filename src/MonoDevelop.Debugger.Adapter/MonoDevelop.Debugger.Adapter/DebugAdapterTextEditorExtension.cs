@@ -59,7 +59,7 @@ namespace MonoDevelop.Debugger.Adapter
 
 		bool IsTextEditorExtensionEnabled ()
 		{
-			var document = DocumentContext as Document;
+			Document document = IdeApp.Workbench.ActiveDocument;
 			if (document == null) {
 				return false;
 			}
@@ -86,7 +86,7 @@ namespace MonoDevelop.Debugger.Adapter
 
 		void LaunchDebugAdapter ()
 		{
-			var document = DocumentContext as Document;
+			Document document = IdeApp.Workbench.ActiveDocument;
 			LaunchConfiguration configuration = DebugAdapterService.GetActiveLaunchConfiguration (document, allowNoneConfiguration: false);
 			if (configuration != null) {
 				var context = new LaunchContext (DocumentContext.Name);

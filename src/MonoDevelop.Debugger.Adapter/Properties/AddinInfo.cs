@@ -34,6 +34,6 @@ using Mono.Addins;
 [assembly:AddinName ("Debug Adapter")]
 [assembly:AddinDescription ("Debug Adapter Protocol support.")]
 
-[assembly:AddinDependency ("Core", "7.4")]
-[assembly:AddinDependency ("Ide", "7.4")]
-[assembly:AddinDependency ("Debugger", "7.4")]
+[assembly:AddinDependency ("Core", "8.1")]
+[assembly:AddinDependency ("Ide", "8.1")]
+[assembly:AddinDependency ("Debugger", "8.1")]

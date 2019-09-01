@@ -26,10 +26,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MonoDevelop.Ide.Editor;
 using Mono.Addins;
+using MonoDevelop.Ide;
+using MonoDevelop.Ide.Editor;
 using MonoDevelop.Ide.Gui;
-using MonoDevelop.Components;
 using Xwt;
 
 namespace MonoDevelop.Debugger.Adapter
@@ -63,7 +63,7 @@ namespace MonoDevelop.Debugger.Adapter
 
 		public override Task<TooltipItem> GetItem (TextEditor editor, DocumentContext ctx, int offset, CancellationToken token = default (CancellationToken))
 		{
-			if (debugTooltipProvider == null || !DebuggingService.IsPaused || !IsEnabled (ctx))
+			if (debugTooltipProvider == null || !DebuggingService.IsPaused || !IsEnabled ())
 				return Task.FromResult<TooltipItem> (null);
 
 			ctx = FixDocumentContext (ctx);
@@ -74,16 +74,17 @@ namespace MonoDevelop.Debugger.Adapter
 
 		DocumentContext FixDocumentContext (DocumentContext ctx)
 		{
-			if (ctx.ParsedDocument != null) {
+			if (ctx?.ParsedDocument != null) {
 				return ctx;
 			}
 
-			return new DummyDocumentContext (ctx);
+			return new DummyDocumentContext (ctx, IdeApp.Workbench.ActiveDocument);
 		}
 
-		bool IsEnabled (DocumentContext ctx)
+		bool IsEnabled ()
 		{
-			var document = ctx as Document;
+			// DocumentContext is null so get the document information again.
+			Document document = IdeApp.Workbench.ActiveDocument;
 			if (document == null) {
 				return false;
 			}
@@ -94,7 +95,7 @@ namespace MonoDevelop.Debugger.Adapter
 
 		public override Components.Window CreateTooltipWindow (TextEditor editor, DocumentContext ctx, TooltipItem item, int offset, ModifierKeys modifierState)
 		{
-			if (debugTooltipProvider == null || !IsEnabled (ctx)) {
+			if (debugTooltipProvider == null || !IsEnabled ()) {
 				return null;
 			}
 

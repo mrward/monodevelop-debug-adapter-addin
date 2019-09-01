@@ -38,48 +38,48 @@ namespace MonoDevelop.Debugger.Adapter
 		DocumentContext context;
 		DefaultParsedDocument parsedDocument;
 
-		public DummyDocumentContext (DocumentContext context)
+		public DummyDocumentContext (DocumentContext context, Ide.Gui.Document document)
 		{
 			this.context = context;
-			parsedDocument = new DefaultParsedDocument (context.Name);
+			parsedDocument = new DefaultParsedDocument (document.FilePath);
 		}
 
 		public override string Name => context.Name;
 
-		public override Projects.Project Project => context.Project;
+		public override Projects.Project Project => context?.Project;
 
-		public override Document AnalysisDocument => context.AnalysisDocument;
+		public override Document AnalysisDocument => context?.AnalysisDocument;
 
 		public override ParsedDocument ParsedDocument => parsedDocument;
 
 		public override void AttachToProject (Projects.Project project)
 		{
-			context.AttachToProject (project);
+			context?.AttachToProject (project);
 		}
 
 		public override OptionSet GetOptionSet ()
 		{
-			return context.GetOptionSet ();
+			return context?.GetOptionSet ();
 		}
 
 		public override void ReparseDocument ()
 		{
-			context.ReparseDocument ();
+			context?.ReparseDocument ();
 		}
 
 		public override Task<ParsedDocument> UpdateParseDocument ()
 		{
-			return context.UpdateParseDocument ();
+			return context?.UpdateParseDocument ();
 		}
 
 		public override T GetContent<T> ()
 		{
-			return context.GetContent<T> ();
+			return context?.GetContent<T> ();
 		}
 
 		public override IEnumerable<T> GetContents<T> ()
 		{
-			return context.GetContents<T> ();
+			return context?.GetContents<T> ();
 		}
 	}
 }
